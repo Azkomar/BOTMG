@@ -1,0 +1,53 @@
+{% extends "childLayout.html" %}
+
+{% block body %}
+<main>
+    <table class="mainTable">
+        {% for genre in listGenre %}
+        <tr class="rowDjn" data-name="{{genre[0]}}">
+            <td class="djnCell">
+                <button type="button" class="djnSortBtn" value="{{ genre[0] }}" onclick="showItm(this, event, {{size}}, '/sort')">
+                    <img    src="./static/img/sortImg/{{ genre[0] }}.png"
+                    alt="{{ genre[0] }}" 
+                    width="130" height="130"
+                    title="{{ genre[0] }}">
+                </button>
+                <p id="nbr{{genre[0]}}">
+                    {{ genre[2] }} / {{ genre[1] }}
+                </p>
+            </td>
+        </tr>
+        <tr class="rowDjnDetails"  id="{{ genre[0] }}"></tr>
+        {% endfor %}
+    </table>
+</main>
+<script type="text/javascript">
+    const active = new Map();
+    function initPage() {
+        let totalItem = parseInt({{totalItem}});
+        let size = parseInt({{size}});
+        let percent = (totalItem / size) * 100;
+        document.getElementById('progress').style.width = percent + '%';
+    }
+    initPage();
+    
+    let srch = document.getElementById('itemSrch');
+    srch.addEventListener('keyup', function(event) {
+        let rows = document.querySelectorAll('.rowDjn');
+        let searchText = srch.value.toLowerCase();
+
+        rows.forEach(function(row) {
+            let detailRow = document.getElementById(row.dataset.name);
+            if (row.dataset.name.toLowerCase().includes(searchText)) {
+                row.style.display = '';
+                detailRow.style.display = '';
+            } else {
+                row.style.display = 'none';
+                detailRow.style.display = 'none';
+            }
+        });
+    });
+</script>
+<script type="text/javascript" src="./static/js/showItm.js"></script>
+<script type="text/javascript" src="./static/js/activateItem.js"></script>
+{% endblock %}

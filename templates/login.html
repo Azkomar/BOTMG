@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<main class="scndMain">
+    <div class="authFrame">
+        <h2>Login</h2>
+        <div class="logPage">
+            <img src="./static/img/ShattKing.png" alt="King" height="150px" width="150px">
+            <form class="scndForm" action="/login" method="post">
+                <input type="text" class="logInput" placeholder="Username" autocomplete="off" name="username" id="username">
+                <input type="password" class="logInput" placeholder="Password" autocomplete="off" name="password" id="password">
+                <p class="errorMessage" id="error"></p>
+                <button type="submit" class="logBtn">Login</button>
+            </form>
+            <img src="./static/img/ShattQueen.png" alt="Queen" height="150px" width="150px">
+        </div>
+        <div class="link">
+            <p><a href="/register">Register</a></p>
+        </div>
+    </div>
+</main>
+<script src="./static/js/auth.js"></script>
+<script>
+    const form = document.querySelector("form");
+
+    // Ajouter un événement pour détecter "Submit"
+    form.addEventListener("submit", function (event) {
+        event.preventDefault(); // Empêche le rechargement de la page par défaut
+        checkLogin();
+    });
+</script>
+{% endblock %}

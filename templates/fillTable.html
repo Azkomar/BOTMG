@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <h1>Fill item table :</h1>
+    <form action="/fillTable" method="POST">
+        <input type="text" placeholder="type" name="type"></input>
+        <input type="text" placeholder="ust" name="ust"></input>
+        <input type="text" placeholder="name" name="name"></input>
+        <input type="text" placeholder="lootFrom" name="lootFrom"></input>
+        <button type="submit">Submit</button>
+    </form>
+    <p>Search item <br>      
+    <link><a href="/tableSearch">Click here !</a></link></p>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>UT/ST</th>
+            <th>Dungeon</th>
+            <th>Id</th>
+        </tr>
+        {% for item in listItems %}
+        <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>{{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+            <td>{{ item[4] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

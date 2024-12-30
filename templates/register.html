@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<main class="scndMain">
+    <div class="authFrame">
+        <h2>-   Register    -</h2>
+        <form class="scndForm" action="/register" method="post">
+            <div id="topReg">
+                <div>
+                    <img src="./static/img/HermitGod.png" alt="HermitBoi" width="128" height="128">
+                </div>
+                <div>
+                    <h4>Username :</h4><br>
+                    <input type="text" class="logInput" placeholder="Username" autocomplete="off" name="username" id="username">
+                    <p class="errorMessage" id="errorUsername"></p>
+                </div>
+            </div>
+            <div id="btmReg">
+                <div id="passInput">
+                    <p><h4>Password :</h4><br>
+                    (at least 6 character long)<br></p>
+                    <input type="password" class="logInput" placeholder="Password" autocomplete="off" name="password" id="password">
+                    <p class="errorMessage" id="errorPassword"></p>
+                    <input type="password" class="logInput" placeholder="Password 2nd time" autocomplete="off" name="passwordRep" id="passwordRep">
+                    <p class="errorMessage" id="errorPasswordRep"></p>
+                </div>
+                <div>
+                    <img src="./static/img/Appetizer.png" alt="BigBoi" width="128" height="128">
+                </div>
+            </div>
+            <button type="submit" class="logBtn">Register</button>
+        </form>
+        <div class="link">
+            <p><a href="/login">Already registered</a></p>
+        </div>
+    </div>
+</main>
+<script src="./static/js/auth.js"></script>
+<script>
+    const form = document.querySelector("form");
+
+    // Ajouter un événement pour détecter "Submit"
+    form.addEventListener("submit", function (event) {
+        event.preventDefault(); // Empêche le rechargement de la page par défaut
+        checkRegister();
+    });
+
+</script>
+{% endblock %}

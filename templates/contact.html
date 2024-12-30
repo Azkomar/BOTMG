@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+
+{% block body%}
+<div id="head">
+    <div id="log">
+        <p id="logP"><img src="./static/img/Avalon.png" alt="Avalon" width="64" height="64" id="avalon">Logged as {{username}}</p>
+        <div>
+            <form action="/tableSearch" method="GET">
+                <button type="submit" name="tableSearch" class="logBtn">Grid</button>
+            </form>
+            <form action="/logout" method="GET">
+                <button type="submit" name="logout" class="logBtn">Logout</button>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="containerContact">
+    <h2>Contact</h2>
+    <form id="contactForm" action="/contact" method="POST">
+        <div class="form-group">
+            <label for="username">Username :</label>
+            <input type="text" id="username" name="username" placeholder="Username" required>
+            <p class="errorMessage" id="errorUsername"></p>
+        </div>
+        <div class="form-group">
+            <label for="email">E-mail :</label>
+            <input type="email" id="email" name="email" placeholder="email" required>
+            <p class="errorMessage" id="errorMail"></p>
+        </div>
+        <div class="form-group">
+            <label for="subject">Sujet :</label>
+            <select name="subject" id="subject" required>
+                <option value="" disabled selected>Choose a subject</option>
+                <option value="idea">Idea</option>
+                <option value="bug">Bug</option>
+                <option value="question">Question</option>
+            </select>
+            <p class="errorMessage" id="errorSubject"></p>
+        </div>
+        <div class="form-group">
+            <label for="message">Message :</label>
+            <textarea id="message" name="message" placeholder="Message" required></textarea>
+            <p class="errorMessage" id="errorMessage"></p>
+        </div>
+        <div class="form-group">
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+</div>
+<script>
+    const form = document.getElementById("contactForm");
+
+    // Ajouter un événement pour détecter "Submit"
+    form.addEventListener("submit", function (event) {
+        event.preventDefault(); // Empêche le rechargement de la page par défaut
+        checkContact();
+    });
+
+    function checkContact() {
+        const usernameField = document.querySelector("#username");
+        const mailField = document.querySelector("#email");
+        const subjectInput = document.querySelector("#subject");
+        const messageField = document.querySelector("#message");
+
+        const errorUsernameField = document.getElementById("errorUsername");
+        const errorMailField = document.getElementById("errorMail");
+        const errorSubjectField = document.getElementById("errorSubject");
+        const errorMessageField = document.getElementById("errorMessage");
+
+        const emailValue = mailField.value;
+        const subjectValue = subjectInput.value;
+        const nameValue = usernameField.value;
+        const messageValue = messageField.value;
+
+        const fields = [
+            { field: usernameField, message: "Please fill the name", errorField: errorUsernameField },
+            { field: mailField, message: "Please fill the email", errorField: errorMailField },
+            { field: messageField, message: "Please fill the message", errorField: errorMessageField}
+        ];
+        // Vérifier si des champs sont vides
+        for (const { field, message, errorField } of fields) {
+            if (!field.value.trim()) { // Vérifie si le champ est vide ou contient uniquement des espaces
+                errorField.innerHTML = message;
+                field.focus();
+                return; // Stoppe la fonction si un champ est vide
+            }
+            else {
+                errorField.innerHTML = '';
+            }
+        }
+
+        const emailRegex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+        if (!emailRegex.test(emailValue)) {
+            errorMailField.innerHTML = 'Please enter a valid email';
+            mailField.focus();
+            return;
+        } else {
+            errorMailField.innerHTML = '';
+        }
+        if (!subjectValue) {
+            errorSubjectField.innerHTML = 'Please choose a subject in the list';
+            subjectInput.focus();
+            return;
+        } else {
+            errorSubjectField.innerHTML = '';
+        }
+
+        // Si toutes les validations passent, préparer et envoyer les données
+        const formData = new FormData();
+        formData.append('name', nameValue);
+        formData.append('email', emailValue);
+        formData.append('subject', subjectValue);
+        formData.append('message', messageValue);
+
+        fetch('/contact', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to send mail");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status != 200) {
+                alert("An error occurred");
+                return;
+            }
+            alert("Thanks for your email !");
+            window.location.href = "/tableSearch";
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("An error occurred during registration");
+        });
+    }
+</script>
+{% endblock %}

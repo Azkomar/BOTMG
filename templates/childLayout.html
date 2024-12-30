@@ -1,0 +1,44 @@
+{% include "layout.html" %}
+<div id="head">
+    <div id="log">
+        <p id="logP"><img src="./static/img/Avalon.png" alt="Avalon" width="64" height="64" id="avalon">Logged as {{username}}</p>
+        <div>
+            <form action="/contact" method="GET">
+                <button type="submit" name="contact" class="logBtn">Contact</button>
+            </form>
+            <form action="/logout" method="GET">
+                <button type="submit" name="logout" class="logBtn">Logout</button>
+            </form>
+        </div>
+    </div>
+    <div id="bar">
+        <div id="progress"></div>
+        <p id="progressText">{{ totalItem }} / {{ size }}</p>
+    </div>
+    <div id="navBar">
+        <a href="/sort?navBtn=dungeon">
+            <button type="button" class="navBtn">
+                By Dungeon
+            </button>
+        </a>
+        <a href="/sort?navBtn=ust">
+            <button type="button" class="navBtn">
+                By UT/ST
+            </button>
+        </a>
+        <a href="/sort?navBtn=type">
+            <button type="button" class="navBtn">
+                By Type
+            </button>
+        </a>
+        <a href="/tableSearch">
+            <button type="button" class="navBtn">
+                By Grid
+            </button>
+        </a>
+    </div>
+    <div id="srchBar">
+        <input type="text" id="itemSrch"></input>
+    </div>
+</div>
+{% block body %}{% endblock %}

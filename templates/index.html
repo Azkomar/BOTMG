@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<main class="scndMain">
+    <div id="imgContainer">
+        <img src="./static/img/stBag.png" alt="Icon" width="128" height="128">
+        <img src="./static/img/whiteBag.png" alt="Icon" width="128" height="128">
+        <img src="./static/img/Gold Bag.png" alt="Icon" width="128" height="128">
+    </div>
+    <h1 class="indexTitle">Welcome to ROTMG Collector !</h1>
+    <h3 class="indexTitle">This is a fan-made website designed to help you track your loot throughout your Realm of the Mad God journey!</h3>
+    <form class="scndForm" action="/" method="get">
+        <button type="submit" class="logBtn" formaction="/register">Register</button>
+        <button type="submit" class="logBtn" formaction="/login" id="loginBtn">Login</button>
+    </form>
+</main>
+{% endblock %}

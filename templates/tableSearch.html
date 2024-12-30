@@ -1,0 +1,62 @@
+{% extends "childLayout.html" %}
+
+{% block body %}
+<main class="containerGrid">
+    <form action="/itemSet" method="POST">
+        <div class="btnSet">
+            <button type="submit" name="setOne">Set all item to 'Active'</button>
+            <button type="submit" name="setZero">Set all item to 'Inactive'</button>
+        </div>
+    </form>
+    <form action="/tableSearch" method="POST">
+        <div class='imgGrid'>
+    {% for item in listItems %}
+            <button type="button" class="btnImg" id="btn{{ item['id'] }}" value="item{{item['id']}}" name="{{item['name']}}" onclick="activateItem(this, event, {{size}})">
+                <img id="itemImage{{ item['id'] }}"
+                        src="./static/img/itemImg/{{ item['name'] }}.png"
+                        alt="{{ item['name'] }}" 
+                        width="55" height="55"
+                        title="{{ item['name'] }}">
+            </button>
+    {% endfor %}
+        </div>
+    </form>
+</main>
+    <script type="text/javascript">
+        function initPage() {
+            let totalItem = parseInt({{totalItem}});
+            let size = parseInt({{size}});
+            let percent = (totalItem / size) * 100;
+            document.getElementById('progress').style.width = percent + '%';
+        
+            let listItems = {{listItems | tojson}};
+            for (i=0; i < listItems.length; i++) {
+                if (listItems[i]['state'] == 1) {
+                    let elem = document.getElementById("btn" + listItems[i]['id']);
+                    elem.classList.replace('btnImg', 'btnImgActive');
+                }
+            }
+        }
+        initPage();
+
+        let srch = document.getElementById('itemSrch');
+        srch.addEventListener('keyup', function(event) {
+            let btns = Array.from(document.querySelectorAll('.btnImg'));
+            let btnsActive = Array.from(document.querySelectorAll('.btnImgActive'));
+            let allBtns = btns.concat(btnsActive);
+            
+            let searchText = srch.value.toLowerCase();  // Texte de recherche, en minuscules pour comparaison
+            // Parcourir tous les boutons
+            allBtns.forEach(function(btn) {
+                // Vérifier si le texte du bouton (name) contient le texte saisi
+                if (btn.name.toLowerCase().includes(searchText)) {
+                    btn.style.display = '';  // Afficher le bouton
+                } else {
+                    btn.style.display = 'none';  // Masquer le bouton
+                }
+            });
+        });
+        
+    </script>
+    <script type="text/javascript" src="./static/js/activateItem.js"></script>
+{% endblock %}
