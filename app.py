@@ -100,7 +100,7 @@ def tableSearch():
             "count": countItm(session),
             "status": status
         }
-        return jsonify(response)  # Retourner la réponse en format JSON
+        return jsonify(response)
 
 @app.route("/sort", methods=["GET", "POST"])
 def sort():
