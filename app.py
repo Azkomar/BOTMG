@@ -176,3 +176,6 @@ def itemSet():
             setAllItems(session, '0')
         return redirect("/tableSearch")
     return redirect("/tableSearch")
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=True)
