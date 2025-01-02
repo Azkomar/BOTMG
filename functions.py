@@ -164,6 +164,8 @@ def bigList(session):
                 dictItems["id"] = listItems[i][4]
                 dictItems["state"] = stateList[i]
                 theList.append(dictItems)
+            # Sort the list by name
+            theList = sorted(theList, key=lambda dict: dict['name'])
             return(theList)
     # If an error occured, return empty list
     except Exception as e:
