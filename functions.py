@@ -15,7 +15,6 @@ def newError(error, func, message):
     """
     try:
         with sqlite3.connect("users.db") as con:
-            print(error, func, message)
             cur = con.cursor()
             cur.execute("INSERT INTO errorLog (errorName, date, function, message) VALUES (?, datetime('now'), ?, ?)", (str(error), str(func), str(message)))
             con.commit()
@@ -207,12 +206,30 @@ def update(session, genre):
     
 def countItm(session):
     # Refresh the progress bar with the current number of items by looking for the total number of 'active' items
-    listItems = bigList(session)
-    count = 0
-    for i in listItems:
-        if i['state'] == "1":
-            count += 1
-    return count
+    # Connexion to bank.db
+    try:
+        with sqlite3.connect("bank.db") as con:
+            cur = con.cursor()
+            # Get column name from 'itemUser' table
+            cur.execute(f"PRAGMA table_info(itemUser);")
+            liste = cur.fetchall()
+            # Delete the 'userId' column
+            del(liste[0])
+            id = session["user_id"]
+            colonnes = [col[1] for col in liste]  # Name column list
+            # Dynamicaly build the request with all the column
+            request = "SELECT " + " + ".join([f"{col}" for col in colonnes]) + " FROM itemUser" f" WHERE userId = '{id}'"
+
+            # Exécuter la requête et afficher le résultat
+            cur.execute(request)
+            result = cur.fetchone()[0]
+            return result
+    except sqlite3.OperationalError as e:
+        newError(e, countItm.__name__, "Error with SQL when counting all the active items")
+        return 0
+    except Exception as e:
+        newError(e, countItm.__name__, "Unknow error when counting all the active items")
+        return 0
 
 def updateUserItem(session, itemId) :
     # Update the state of a specific item by looking at his previous state
@@ -302,11 +319,9 @@ def setAllItems(session, value):
             listItems = bigList(session)
             size = len(listItems)
             cur = con.cursor()
-            for i in range(size+1):
+            for i in range(size):
                 item = "item"+str(i+1)
-                # Error in the DB, there's no item103
-                if item != 'item103':
-                    cur.execute(f"UPDATE itemUser SET {item} = ? WHERE userId = ?", (value, session["user_id"]))
+                cur.execute(f"UPDATE itemUser SET {item} = ? WHERE userId = ?", (value, session["user_id"]))
             con.commit()
     except Exception as e:
         newError(e, setAllItems.__name__, "Error during the setting of all value to 0 or 1")
