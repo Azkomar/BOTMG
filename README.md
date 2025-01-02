@@ -1,6 +1,5 @@
 # Bag of the Mad God
 #### Video Demo:  <URL HERE>
-#### Description:
 
 # Brief Explaination
 This project is related to the video game "Realm of the Mad God."

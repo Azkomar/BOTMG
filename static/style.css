@@ -280,12 +280,12 @@ button:hover {
     align-items: center;
 }
 
-#logP {
+.logP {
     display: flex;
     align-items: center;
 }
 
-#avalon {
+.headImg {
     padding-right:5%;
 }
 

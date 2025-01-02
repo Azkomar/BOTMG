@@ -1,11 +1,11 @@
 import os
-from dotenv import find_dotenv, load_doatenv
+from dotenv import find_dotenv, load_dotenv
 
 # find .env automatically
 dotenvPath = find_dotenv()
 
 # load up the entries as environment variables
-load_doatenv(dotenvPath)
+load_dotenv(dotenvPath)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
