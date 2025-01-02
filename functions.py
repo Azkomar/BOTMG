@@ -180,14 +180,20 @@ def update(session, genre):
             listGenre = listGenre.fetchall()
             listItems = bigList(session)
             listItems = sorted(listItems, key=itemgetter("dungeon"))
-            # Look for the 'active' items
+
+            # Convert listGenre in dictionnary for quick access
+            genre_dict = {type[0]: (type[0], type[1], int(type[2])) for type in listGenre}
+
+            # Update listGenre with genre_dict
             for item in listItems:
                 if item['state'] == '1':
-                    # If there's one, check for the corresponding 'genre' and update it
-                    for i, type in enumerate(listGenre):
-                        if type[0] == item[genre]:  
-                            listGenre[i] = (type[0], type[1], int(type[2]) + 1)
+                    genre_key = item[genre]
+                    if genre_key in genre_dict:
+                        # Update the corresponding value
+                        genre_dict[genre_key] = (genre_key, genre_dict[genre_key][1], genre_dict[genre_key][2] + 1)
 
+            # Rebuild the list based on the dictionnary
+            listGenre = list(genre_dict.values())
             return listGenre
     # If an error occured, return empty list
     except sqlite3.OperationalError as e:
