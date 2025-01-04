@@ -1,19 +1,18 @@
-function showItm(button, event, taille, ajax) {
+function showItm(button, event, taille) {
     event.preventDefault();
-    var selectedItem = button.value;
-    var formData = new FormData();
+    let selectedItem = button.value;
+    let formData = new FormData();
     formData.append('djnSortBtn', selectedItem);
-
     // Envoyer la requête via fetch (AJAX)
-    fetch(ajax, {
+    fetch('/sort', {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())  // Si la réponse est JSON
     .then(data => {
-        var details = document.getElementById(selectedItem);
-        var nbrElement = document.getElementById('nbr' + selectedItem);
-        nbrElement.innerHTML = data.djnState[1] + " / " + data.djnState[0];
+        let details = document.getElementById(selectedItem);
+        let nbrElement = document.getElementById('nbr' + selectedItem);
+        nbrElement.innerHTML = '<span class="itmUsr">' + data.djnState[1] + '</span>' + " / " + '<span class="totalItm">' + data.djnState[0] + '</span>';
 
         if (active.has(selectedItem)) {
             details.innerHTML = '';  // Vide le contenu si l'élément est déjà actif
@@ -21,6 +20,7 @@ function showItm(button, event, taille, ajax) {
         } else {
             let contentDetails = '<td class="djnDetails">';
             let len = data.liste.length;
+            // Génère les boutons en fonction de la demande
             for (let i = 0; i < len; i++) {
                 if (data.liste[i]["state"] == 1) {
                     contentDetails += `

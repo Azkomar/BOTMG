@@ -7,7 +7,7 @@
         <tr class="rowDjn" data-name="{{genre[0]}}">
             <td class="djnCell">
                 <div class="sortDetailsBtn">
-                    <button type="button" class="djnSortBtn" value="{{ genre[0] }}" onclick="showItm(this, event, {{size}}, '/sort')">
+                    <button type="button" class="djnSortBtn" value="{{ genre[0] }}" onclick="showItm(this, event, {{size}})">
                         <img    src="./static/img/sortImg/{{ genre[0] }}.png"
                         alt="{{ genre[0] }}" 
                         width="130" height="130"
@@ -16,7 +16,7 @@
                 </div>
                 <div class="sortDetailsP">
                     <p id="nbr{{genre[0]}}">
-                        {{ genre[2] }} / {{ genre[1] }}
+                        <span class="itmUsr">{{ genre[2] }}</span> / <span class="totalItm">{{ genre[1] }}</span>
                     </p>
                 </div>
             </td>
@@ -27,31 +27,11 @@
 </main>
 <script type="text/javascript">
     const active = new Map();
-    function initPage() {
-        let totalItem = parseInt({{totalItem}});
-        let size = parseInt({{size}});
-        let percent = (totalItem / size) * 100;
-        document.getElementById('progress').style.width = percent + '%';
-    }
-    initPage();
-    
-    let srch = document.getElementById('itemSrch');
-    srch.addEventListener('keyup', function(event) {
-        let rows = document.querySelectorAll('.rowDjn');
-        let searchText = srch.value.toLowerCase();
-
-        rows.forEach(function(row) {
-            let detailRow = document.getElementById(row.dataset.name);
-            if (row.dataset.name.toLowerCase().includes(searchText)) {
-                row.style.display = '';
-                detailRow.style.display = '';
-            } else {
-                row.style.display = 'none';
-                detailRow.style.display = 'none';
-            }
-        });
-    });
+    const size = parseInt({{size}});
+    let totalItem = parseInt({{totalItem}});
 </script>
-<script type="text/javascript" src="./static/js/showItm.js"></script>
-<script type="text/javascript" src="./static/js/activateItem.js"></script>
+<script type="module" src="./static/js/sortSearch.js"></script>
+<script type="module" src="./static/js/initFunc.js"></script>
+<script src="./static/js/showItm.js"></script>
+<script src="./static/js/activateItem.js"></script>
 {% endblock %}
