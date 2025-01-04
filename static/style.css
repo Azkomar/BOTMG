@@ -224,6 +224,14 @@ button:hover {
     border-radius: 5px 5px 5px 5px;
 }
 
+.sortDetailsBtn {
+    width: 175px;
+}
+
+.sortDetailsP {
+    width: 100px;
+}
+
 .djnDetails {
     padding-top: 5%;
     padding-bottom: 5%;
@@ -304,7 +312,7 @@ button:hover {
     width: 0;
     height: 50px;
     z-index: 1;
-    background: linear-gradient(to right, #578d5a 0%, #3e8a42 15%, #357e2b 50%, #019437 100%);
+    background: linear-gradient(90deg, #7C3AED, #3B82F6);
     border-radius: 5px 5px 5px 5px;
 }
 
