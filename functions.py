@@ -1,5 +1,7 @@
 import sqlite3
 import re
+import psycopg2
+from psycopg2 import sql
 from werkzeug.security import generate_password_hash, check_password_hash
 from uuid import uuid4
 from operator import itemgetter
@@ -209,20 +211,16 @@ def countItm(session):
     # Connexion to bank.db
     try:
         with sqlite3.connect("bank.db") as con:
+            result = 0
             cur = con.cursor()
-            # Get column name from 'itemUser' table
-            cur.execute(f"PRAGMA table_info(itemUser);")
-            liste = cur.fetchall()
-            # Delete the 'userId' column
-            del(liste[0])
-            id = session["user_id"]
-            colonnes = [col[1] for col in liste]  # Name column list
-            # Dynamicaly build the request with all the column
-            request = "SELECT " + " + ".join([f"{col}" for col in colonnes]) + " FROM itemUser" f" WHERE userId = '{id}'"
-
-            # Exécuter la requête et afficher le résultat
-            cur.execute(request)
-            result = cur.fetchone()[0]
+            listValue = cur.execute("SELECT * FROM itemUser WHERE userId = ?", (session["user_id"],))
+            listValue = listValue.fetchall()
+            listValue[0] = ','.join(listValue[0])
+            listValue = listValue[0].split(',')
+            del(listValue[0])
+            for i in range(len(listValue)):
+                if listValue[i] == '1':
+                    result += 1
             return result
     except sqlite3.OperationalError as e:
         newError(e, countItm.__name__, "Error with SQL when counting all the active items")
