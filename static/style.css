@@ -208,15 +208,11 @@ button:hover {
     border-bottom: 1px solid black;
     background-color: rgb(17, 17, 17);
 }
-.djnCell, .djnCellFull {
+.djnCell {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
-}
-
-.djnCellFull {
-    background-color: rgb(24, 100, 58);
 }
 
 .djnSortBtn {

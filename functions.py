@@ -326,12 +326,3 @@ def setAllItems(session, value):
     except Exception as e:
         newError(e, setAllItems.__name__, "Error during the setting of all value to 0 or 1")
         return(400)
-    
-def newItemId(itemId) :
-    with sqlite3.connect("bank.db") as con:
-        cur = con.cursor()
-        # Concatenation du mot 'item' + id de l'item pour la création d'une nouvelle colone
-        itemId = "item" + str(itemId)
-        # Ajout de la nouvelle colonne avec le nom itemX ou x est un entier correspondant a l'id d'un item
-        cur.execute(f"ALTER TABLE itemUser ADD COLUMN {itemId} TEXT NOT NULL DEFAULT '0'")
-        con.commit()

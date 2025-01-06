@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, jsonify
 from flask_mail import Mail
 from datetime import timedelta
-import sqlite3
-from functions import newUser, checkLogin, getId, newItemId, bigList, getListItems, update, countItm, updateUserItem, sortPage, sendEmail, is_valid_email, setAllItems
+from functions import newUser, checkLogin, getId, bigList, update, countItm, updateUserItem, sortPage, sendEmail, is_valid_email, setAllItems
 
 app = Flask(__name__)
 app.config.from_object("config")
@@ -57,28 +56,8 @@ def logout():
     session.clear()
     return redirect("/")
 
-@app.route("/fillTable", methods=["GET", "POST"])
-def fillTable():
-    listItems = getListItems()
-    if request.method == "GET":
-        return render_template("fillTable.html", listItems=listItems)
-    
-    with sqlite3.connect("users.db") as con:
-        cur = con.cursor()
-        typeItem = request.form.get("type")
-        ust = request.form.get("ust")
-        name = request.form.get("name")
-        dungeon = request.form.get("lootFrom")
-        data =[(name, typeItem, ust, dungeon)]
-        cur.executemany("INSERT INTO items (name, type, ust, dungeon) VALUES (?, ?, ?, ?)", data)
-        data = [(name)]
-        itemId = cur.execute("SELECT id FROM items WHERE name = ?", data)
-        itemId = itemId.fetchall()
-        itemId = itemId[0][0]
-        newItemId(itemId)
-        con.commit()
-    
-    return redirect("/fillTable")
+##############################################################
+""" Need verification """
 
 @app.route("/tableSearch", methods=["GET", "POST"])
 def tableSearch():
@@ -178,4 +157,4 @@ def itemSet():
     return redirect("/tableSearch")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(debug=True)
