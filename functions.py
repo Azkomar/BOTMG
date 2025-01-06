@@ -7,7 +7,18 @@ from uuid import uuid4
 from operator import itemgetter
 from flask_mail import Mail, Message
 
-def newError(error, func, message):
+
+def get_db_connection():
+    conn = psycopg2.connect(
+        dbname="defaultdb",
+        user="appuser",
+        password="botmgcuties",
+        host="bagofthemadgoddb-guillaume-f0ac.d.aivencloud.com",
+        port="21708"
+    )
+    return conn
+
+def newError(error, func, message, conn):
     # Function used to log error into a database
     """
     The parameters are :
@@ -16,74 +27,77 @@ def newError(error, func, message):
         message -> The message link to the error
     """
     try:
-        with sqlite3.connect("users.db") as con:
-            cur = con.cursor()
-            cur.execute("INSERT INTO errorLog (errorName, date, function, message) VALUES (?, datetime('now'), ?, ?)", (str(error), str(func), str(message)))
-            con.commit()
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO errorLog (errorName, date, function, message) VALUES (%s, NOW(), %s, %s)", (str(error), str(func), str(message)))
+            conn.commit()
     except Exception as e:
         print("An error occured during the error logging...")
 
-def newUser(username, password):
-    # Function used to create a new user if the parameters are valid
+def newUser(username, password, conn):
+    # Fonction utilisée pour créer un nouvel utilisateur si les paramètres sont valides
     try:
-        # Connexion to the database 'users.db'
-        with sqlite3.connect("users.db") as con:
-            # Create a pointer "cur" in this DB
-            cur = con.cursor()
-            # Check if the username is already taken
-            cur.execute("SELECT 1 FROM users WHERE username = ?", (username,))
-            # If cur.execute returns nothing, the username is available; otherwise, return an error
+        # Avec cette connexion, le curseur est également géré via un "with"
+        with conn.cursor() as cur:
+            # Vérifier si le nom d'utilisateur est déjà pris
+            cur.execute("SELECT 1 FROM users WHERE username = %s", (username,))
             if cur.fetchone() is not None:
+                # Si le nom d'utilisateur existe déjà, retourner une erreur 401
                 return 401
-            # Secure the password using a hashing function
-            hashPass = generate_password_hash(password)
-            # Generate a unique random ID
-            id = str(uuid4())
-            # Create a new entry in the "bank.db" database for the new user
-            if newUserDB(id) is False:
-                raise Exception("Erreur lors de la création dans bank.db")
-            # Add the user's information to the 'data' tuple for insertion into the DB
-            data = [(username, hashPass, id)]
-            cur.executemany("INSERT INTO users (username, hash, id) VALUES (?, ?, ?)",data)
-            con.commit()
-        return 200
-    # Check if there's an error with the sql insertion
-    except sqlite3.OperationalError as e:
-        newError(e, newUser.__name__, "Error with SQL during the creation of a new user")
-        return 400
-    # Check if there's another error
-    except Exception as e:
-        newError(e, newUser.__name__, "Unknown error during the creation of a new user")
-        return 400
 
-def newUserDB(id):
+            # Sécuriser le mot de passe en utilisant une fonction de hachage
+            hashPass = generate_password_hash(password)
+
+            # Générer un ID unique avec UUID
+            id = str(uuid4())
+
+            # Insérer le nouvel utilisateur dans la table "users"
+            data = (username, hashPass, id)
+
+            # Insérer les données dans la table 'users'
+            cur.execute("INSERT INTO users (username, hash, id) VALUES (%s, %s, %s)", data)
+
+            # Création d'une nouvelle ligne
+            newUserDB(id)
+
+            # Valider la transaction (commit)
+            conn.commit()
+    
+    except psycopg2.OperationalError as e:
+        # Gérer les erreurs liées à la base de données
+        newError(e, newUser.__name__, "Erreur avec SQL lors de la création d'un nouvel utilisateur", conn)
+        return 400
+    
+    except Exception as e:
+        # Gérer toute autre erreur
+        newError(e, newUser.__name__, "Erreur inconnue lors de la création d'un nouvel utilisateur", conn)
+        return 400
+    
+def newUserDB(id, conn):
     # Create a new line in the 'bank' database for the new user based on his ID
     """
     Return True if the line is created correctly
     Retrun False if an error occured
     """
     try:
-        with sqlite3.connect("bank.db") as con:
-            cur = con.cursor()
-            cur.execute("INSERT INTO itemUser (userId) VALUES (?)", (id,))
-            con.commit()
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO itemUser (userId) VALUES (%s)", (id,))
+            conn.commit()
             return True
     except sqlite3.OperationalError as e:
-        newError(e, newUserDB.__name__, "Error with SQL during the creation of a new user database")
+        newError(e, newUserDB.__name__, "Error with SQL during the creation of a new user database", conn)
         return False
 
-def checkLogin(username, password):
+def checkLogin(username, password, conn):
     # Check if the login information match the database
     username = tuple([username])
     try:
-        with sqlite3.connect("users.db") as con:
-            cur = con.cursor()
+        with conn.cursor() as cur:
             # Check if username exist in the database
-            cur.execute("SELECT username FROM users WHERE username = ?", username)
+            cur.execute("SELECT username FROM users WHERE username = %s", username)
             if cur.fetchone() is not None:
                 # If username exist, check if the password hashing correspond
-                hashPass = cur.execute("SELECT hash FROM users WHERE username = ?", username)
-                hashPass = hashPass.fetchall()
+                cur.execute("SELECT hash FROM users WHERE username = %s", username)
+                hashPass = cur.fetchall()
                 hashPass = hashPass[0][0]
                 # If everything match return 200 status
                 if check_password_hash(hashPass, password):
@@ -95,60 +109,55 @@ def checkLogin(username, password):
             else:
                 return 400
     except sqlite3.OperationalError as e:
-        newError(e, checkLogin.__name__, "Error with SQL during the connexion of a user")
+        newError(e, checkLogin.__name__, "Error with SQL during the connexion of a user", conn)
         return 400
     except Exception as e:
-        newError(e, checkLogin.__name__, "Unknow error during the connexion of a user")
+        newError(e, checkLogin.__name__, "Unknow error during the connexion of a user", conn)
         return 400
         
 
-def getId(username):
+def getId(username, conn):
     # Get an id corresponding to the username
     try:
-        with sqlite3.connect("users.db") as con:
-            cur = con.cursor()
-            id = cur.execute("SELECT id FROM users WHERE username = ?", (username,))
-            id = id.fetchall()
+        with conn.cursor() as cur:
+            cur.execute("SELECT id FROM users WHERE username = %s", (username,))
+            id = cur.fetchall()
             return id[0][0]
     # If an error occured, return 0 value
     except sqlite3.OperationalError as e:
-        newError(e, getId.__name__, "Error with SQL when getting the user's id")
+        newError(e, getId.__name__, "Error with SQL when getting the user's id", conn)
         return 0
     except Exception as e:
-        newError(e, getId.__name__, "Unknow error when getting the user's id")
+        newError(e, getId.__name__, "Unknow error when getting the user's id", conn)
         return 0
 
-def getListItems():
+def getListItems(conn):
     # Use to get the list of all the existing items
     try:
-        with sqlite3.connect("users.db") as con:
-            cur = con.cursor()
-            listItems = cur.execute("SELECT * FROM items")
-            listItems = listItems.fetchall()
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM items")
+            listItems = cur.fetchall()
             return listItems
     # If an error occured, return empty list
     except sqlite3.OperationalError as e:
-        newError(e, getListItems.__name__, "Error with SQL when getting the list of all the items")
+        newError(e, getListItems.__name__, "Error with SQL when getting the list of all the items", conn)
         return []
     except Exception as e:
-        newError(e, getListItems.__name__, "Unknow error when getting the list of all the items")
+        newError(e, getListItems.__name__, "Unknow error when getting the list of all the items", conn)
         return []
 
-def bigList(session):
+def bigList(session, conn):
     """
     This function link the 2 database (bank and users) in a single list of dictionnary
     the dict contain all the items informations + the state of the items (if the user has it or not) 
     """
     try:
-        with sqlite3.connect("bank.db") as con:
-            cur = con.cursor()
-            listItems = getListItems()
-
+        with conn.cursor() as cur:
+            listItems = getListItems(conn)
             # Get all the state of the the items for the actual user
             theList = []
-            stateList = cur.execute("SELECT * FROM itemUser WHERE userId = ?", (session["user_id"], ))
-            stateList = stateList.fetchall()
-
+            cur.execute("SELECT * FROM itemUser WHERE userId = %s", (session["user_id"], ))
+            stateList = cur.fetchall()
             # Converting the list into tuple
             stateList[0] = ','.join(stateList[0])
             stateList = stateList[0].split(',')
@@ -170,18 +179,20 @@ def bigList(session):
             return(theList)
     # If an error occured, return empty list
     except Exception as e:
-        newError(e, bigList.__name__, "Unknow error during the loading of the big list")
+        newError(e, bigList.__name__, "Unknow error during the loading of the big list", conn)
         return []
 
-def update(session, genre):
+def update(session, genre, conn):
     # Use to update the state of the items in the sort page
+    allowed_genres = ["dungeon", "ust", "type"]  # Liste des noms de colonnes autorisés
+    if genre not in allowed_genres:
+        raise ValueError("Genre invalide")
     try:
-        with sqlite3.connect("users.db") as con:
-            cur = con.cursor()
+        with conn.cursor() as cur:
             # Get a list order by the selected 'genre' (dungeon, type, ust)
-            listGenre = cur.execute(f"SELECT DISTINCT({genre}), COUNT({genre}), 0 FROM items GROUP BY {genre} ORDER BY {genre}")
-            listGenre = listGenre.fetchall()
-            listItems = bigList(session)
+            cur.execute(f"SELECT DISTINCT ({genre}), COUNT ({genre}), 0 FROM items GROUP BY ({genre}) ORDER BY ({genre})")
+            listGenre = cur.fetchall()
+            listItems = bigList(session, conn)
             listItems = sorted(listItems, key=itemgetter("dungeon"))
 
             # Convert listGenre in dictionnary for quick access
@@ -200,55 +211,54 @@ def update(session, genre):
             return listGenre
     # If an error occured, return empty list
     except sqlite3.OperationalError as e:
-        newError(e, update.__name__, "Error with SQL when updating the states of a list of items")
+        newError(e, update.__name__, "Error with SQL when updating the states of a list of items", conn)
         return []
     except Exception as e:
-        newError(e, update.__name__, "Unknow error when updating the states of a list of items")
+        newError(e, update.__name__, "Unknow error when updating the states of a list of items", conn)
         return []
     
-def countItm(session):
+def countItm(session, conn):
     # Refresh the progress bar with the current number of items by looking for the total number of 'active' items
     # Connexion to bank.db
     try:
-        with sqlite3.connect("bank.db") as con:
+        with conn.cursor() as cur:
             result = 0
-            cur = con.cursor()
-            listValue = cur.execute("SELECT * FROM itemUser WHERE userId = ?", (session["user_id"],))
-            listValue = listValue.fetchall()
+            cur.execute("SELECT * FROM itemUser WHERE userId = %s", (session["user_id"],))
+            listValue = cur.fetchall()
             listValue[0] = ','.join(listValue[0])
             listValue = listValue[0].split(',')
             del(listValue[0])
             for i in range(len(listValue)):
-                if listValue[i] == '1':
+                if listValue[i-1] == '1':
                     result += 1
             return result
     except sqlite3.OperationalError as e:
-        newError(e, countItm.__name__, "Error with SQL when counting all the active items")
+        newError(e, countItm.__name__, "Error with SQL when counting all the active items", conn)
         return 0
     except Exception as e:
-        newError(e, countItm.__name__, "Unknow error when counting all the active items")
+        newError(e, countItm.__name__, "Unknow error when counting all the active items", conn)
         return 0
 
-def updateUserItem(session, itemId) :
+def updateUserItem(session, itemId, conn) :
     # Update the state of a specific item by looking at his previous state
     try:
-        with sqlite3.connect("bank.db") as con:
-            cur = con.cursor()
-            itemState = cur.execute(f"SELECT {itemId} FROM itemUser WHERE userId = ?", (session["user_id"],)).fetchone()
+        with conn.cursor() as cur:
+            cur.execute(f"SELECT {itemId} FROM itemUser WHERE userId = %s", (session["user_id"],))
+            itemState = cur.fetchone()
             if itemState[0] == '0':
-                cur.execute(f"UPDATE itemUser SET {itemId} = 1 WHERE userId = ?", (session["user_id"],))
+                cur.execute(f"UPDATE itemUser SET {itemId} = 1 WHERE userId = %s", (session["user_id"],))
                 state = 1
             else :
-                cur.execute(f"UPDATE itemUser SET {itemId} = 0 WHERE userId = ?", (session["user_id"],))
+                cur.execute(f"UPDATE itemUser SET {itemId} = 0 WHERE userId = %s", (session["user_id"],))
                 state = 0
-            con.commit()
+            conn.commit()
             return state
     # If an error occured, return empty list
     except sqlite3.OperationalError as e:
-        newError(e, updateUserItem.__name__, "Error with SQL when updating the state of a specific item")
+        newError(e, updateUserItem.__name__, "Error with SQL when updating the state of a specific item", conn)
         return 0
     except Exception as e:
-        newError(e, updateUserItem.__name__, "Unknow error when updating the state of a specific item")
+        newError(e, updateUserItem.__name__, "Unknow error when updating the state of a specific item", conn)
         return 0
 def sortPage(type, listType, listItems):
     # Return the list corresponding to the selected 'object' in the selected 'genre'
@@ -273,7 +283,7 @@ def sortPage(type, listType, listItems):
     }
     return response
 
-def sendEmail(name, email, subject, message, mail):
+def sendEmail(name, email, subject, message, mail, conn):
     # Create a Message object to send it with Flask-Mail
     try:
         # Construction of the Message object
@@ -294,15 +304,14 @@ def sendEmail(name, email, subject, message, mail):
 
         # Send email
         mail.send(msg)
-        with sqlite3.connect("bank.db") as con:
-            cur = con.cursor()
+        with conn.cursor() as cur:
             data = [(name, email, subject, message)]
-            cur.executemany("INSERT INTO mail (name, mail, subject, message, date) VALUES (?, ?, ?, ?, DATETIME('now'))", data)
-            con.commit()
+            cur.executemany("INSERT INTO mail (name, mail, subject, message, date) VALUES (%s, %s, %s, %s, NOW())", data)
+            conn.commit()
         return 200
 
     except Exception as e:
-        newError(e, sendEmail.__name__, "Error during the construction of the mail")
+        newError(e, sendEmail.__name__, "Error during the construction of the mail", conn)
         return 400
     
 def is_valid_email(email):
@@ -310,17 +319,16 @@ def is_valid_email(email):
     email_regex = r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
     return re.match(email_regex, email) is not None
 
-def setAllItems(session, value):
+def setAllItems(session, value, conn):
     # Set all the items to 'Active' or 'Inactive' depending of the value
     try:
-        with sqlite3.connect("bank.db") as con:
-            listItems = bigList(session)
+        with conn.cursor() as cur:
+            listItems = bigList(session, conn)
             size = len(listItems)
-            cur = con.cursor()
             for i in range(size):
                 item = "item"+str(i+1)
-                cur.execute(f"UPDATE itemUser SET {item} = ? WHERE userId = ?", (value, session["user_id"]))
-            con.commit()
+                cur.execute(f"UPDATE itemUser SET {item} = %s WHERE userId = %s", (value, session["user_id"]))
+            conn.commit()
     except Exception as e:
-        newError(e, setAllItems.__name__, "Error during the setting of all value to 0 or 1")
+        newError(e, setAllItems.__name__, "Error during the setting of all value to 0 or 1", conn)
         return(400)

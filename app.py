@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, jsonify
 from flask_mail import Mail
 from datetime import timedelta
-from functions import newUser, checkLogin, getId, bigList, update, countItm, updateUserItem, sortPage, sendEmail, is_valid_email, setAllItems
+from functions import newUser, checkLogin, getId, bigList, update, countItm, updateUserItem, sortPage, sendEmail, is_valid_email, setAllItems, get_db_connection
 
 app = Flask(__name__)
 app.config.from_object("config")
@@ -9,6 +9,8 @@ app.permanent_session_lifetime = timedelta(days=15)
 
 # Initialisation de Flask-Mail
 mail = Mail(app)
+
+conn = get_db_connection()
 
 @app.route("/")
 def index():
@@ -21,7 +23,7 @@ def register():
     
     username = request.form.get("username")
     password = request.form.get("password")
-    status = newUser(username, password)
+    status = newUser(username, password, conn)
 
     response = {
         "status": status
@@ -37,9 +39,9 @@ def login():
     
     username = request.form.get("username")
     password = request.form.get("password")
-    status = checkLogin(username, password)
+    status = checkLogin(username, password, conn)
     if status == 200 :
-        id = getId(username)
+        id = getId(username, conn)
         if id != 0:
             session["user_id"] = id
             session["user"] = username
@@ -62,11 +64,11 @@ def logout():
 @app.route("/tableSearch", methods=["GET", "POST"])
 def tableSearch():
     if "user" in session: 
-        listItems = bigList(session)
+        listItems = bigList(session, conn)
         if "size" not in session:
             size = len(listItems)
             session["size"] = size
-        totalItem = countItm(session)
+        totalItem = countItm(session, conn)
     else:
         return redirect("/login")
     
@@ -74,9 +76,9 @@ def tableSearch():
         return render_template("tableSearch.html", listItems=listItems, size=session["size"], totalItem=totalItem, username=session["user"])
     elif request.method == "POST": 
         itemId = request.form.get('btnImg')
-        status = updateUserItem(session, itemId)
+        status = updateUserItem(session, itemId, conn)
         response = {
-            "count": countItm(session),
+            "count": countItm(session, conn),
             "status": status
         }
         return jsonify(response)
@@ -84,11 +86,11 @@ def tableSearch():
 @app.route("/sort", methods=["GET", "POST"])
 def sort():
     if "user" in session:
-        listItems = bigList(session)
+        listItems = bigList(session, conn)
         if "size" not in session:
-            size = len(listItems)
+            size = len(listItems, conn)
             session["size"] = size
-        totalItem = countItm(session)
+        totalItem = countItm(session, conn)
     else:
         return redirect("/login")
     # Vérifier si une variable est déjà stockée dans la session
@@ -102,13 +104,13 @@ def sort():
         genre = request.args.get('navBtn', genre)  # Utiliser l'argument de l'URL ou la valeur stockée
         if genre not in ("dungeon", "ust", "type"):
             return redirect("/tableSearch")
-        listGenre = update(session, genre)
+        listGenre = update(session, genre, conn)
         session['genre'] = genre  # Stocker la variable dans la session
         return render_template("sort.html", listGenre=listGenre, size=session["size"], totalItem=totalItem, username=session["user"])
     
     elif request.method == "POST":
         req = request.form.get('djnSortBtn')
-        listGenre = update(session, genre)
+        listGenre = update(session, genre, conn)
         response = sortPage(req, listGenre, listItems)
         return jsonify(response)
 
@@ -150,9 +152,9 @@ def contact():
 def itemSet():
     if request.method == "POST":
         if request.form.get("setOne") is not None:
-            setAllItems(session, '1')
+            setAllItems(session, '1', conn)
         elif request.form.get("setZero") is not None:
-            setAllItems(session, '0')
+            setAllItems(session, '0', conn)
         return redirect("/tableSearch")
     return redirect("/tableSearch")
 
