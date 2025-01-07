@@ -25,11 +25,11 @@ DB_PORT = os.getenv('DB_PORT')
 mail = Mail(app)
 
 conn = psycopg2.connect(
-        dbname="defaultdb",
-        user="avnadmin",
-        password="AVNS_BlEbpg-crrQdUKT8n9v",
-        host="bagofthemadgoddb-guillaume-f0ac.d.aivencloud.com",
-        port="21708"
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
     )
 
 @app.route("/")
