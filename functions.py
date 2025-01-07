@@ -4,19 +4,7 @@ import psycopg2
 from psycopg2 import sql
 from werkzeug.security import generate_password_hash, check_password_hash
 from uuid import uuid4
-from operator import itemgetter
 from flask_mail import Mail, Message
-
-
-def get_db_connection():
-    conn = psycopg2.connect(
-        dbname="defaultdb",
-        user="avnadmin",
-        password="AVNS_BlEbpg-crrQdUKT8n9v",
-        host="bagofthemadgoddb-guillaume-f0ac.d.aivencloud.com",
-        port="21708"
-    )
-    return conn
 
 def newError(error, func, message, conn):
     # Function used to log error into a database

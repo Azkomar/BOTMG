@@ -1,16 +1,36 @@
 from flask import Flask, render_template, request, redirect, session, jsonify
 from flask_mail import Mail
 from datetime import timedelta
-from functions import newUser, checkLogin, getId, update, countItm, updateUserItem, sortPage, sendEmail, is_valid_email, setAllItems, get_db_connection, getListItems
+from functions import newUser, checkLogin, getId, update, countItm, updateUserItem, sortPage, sendEmail, is_valid_email, setAllItems, getListItems
+import psycopg2
+import os
+from dotenv import find_dotenv, load_dotenv
+
+# find .env automatically
+dotenvPath = find_dotenv()
+# load up the entries as environment variables
+load_dotenv(dotenvPath)
 
 app = Flask(__name__)
 app.config.from_object("config")
 app.permanent_session_lifetime = timedelta(days=15)
 
+DB_NAME = os.getenv('DB_NAME')
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_HOST = os.getenv('DB_HOST')
+DB_PORT = os.getenv('DB_PORT')
+
 # Initialisation de Flask-Mail
 mail = Mail(app)
 
-conn = get_db_connection()
+conn = psycopg2.connect(
+        dbname="defaultdb",
+        user="avnadmin",
+        password="AVNS_BlEbpg-crrQdUKT8n9v",
+        host="bagofthemadgoddb-guillaume-f0ac.d.aivencloud.com",
+        port="21708"
+    )
 
 @app.route("/")
 def index():
