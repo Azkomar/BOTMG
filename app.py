@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, jsonify
 from flask_mail import Mail
 from datetime import timedelta
-from functions import newUser, checkLogin, getId, bigList, update, countItm, updateUserItem, sortPage, sendEmail, is_valid_email, setAllItems, get_db_connection
+from functions import newUser, checkLogin, getId, update, countItm, updateUserItem, sortPage, sendEmail, is_valid_email, setAllItems, get_db_connection, getListItems
 
 app = Flask(__name__)
 app.config.from_object("config")
@@ -64,7 +64,7 @@ def logout():
 @app.route("/tableSearch", methods=["GET", "POST"])
 def tableSearch():
     if "user" in session: 
-        listItems = bigList(session, conn)
+        listItems = getListItems(session, conn)
         if "size" not in session:
             size = len(listItems)
             session["size"] = size
@@ -86,7 +86,7 @@ def tableSearch():
 @app.route("/sort", methods=["GET", "POST"])
 def sort():
     if "user" in session:
-        listItems = bigList(session, conn)
+        listItems = getListItems(session, conn)
         if "size" not in session:
             size = len(listItems, conn)
             session["size"] = size
@@ -110,8 +110,7 @@ def sort():
     
     elif request.method == "POST":
         req = request.form.get('djnSortBtn')
-        listGenre = update(session, genre, conn)
-        response = sortPage(req, listGenre, listItems)
+        response = sortPage(req, session, conn)
         return jsonify(response)
 
 @app.route("/contact", methods=["GET", "POST"])

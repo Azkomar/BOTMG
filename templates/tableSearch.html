@@ -11,12 +11,12 @@
     <form action="/tableSearch" method="POST">
         <div class='imgGrid'>
     {% for item in listItems %}
-            <button type="button" class="btnImg" id="btn{{ item['id'] }}" value="item{{item['id']}}" name="{{item['name']}}" onclick="activateItem(this, event, {{size}})">
-                <img id="itemImage{{ item['id'] }}"
-                        src="./static/img/itemImg/{{ item['name'] }}.png"
-                        alt="{{ item['name'] }}" 
+            <button type="button" {% if item[5] == 0 %}class="btnImg"{% else %}class="btnImgActive"{% endif %} id="btn{{ item[4] }}" value="{{item[4]}}" name="{{item[0]}}" onclick="activateItem(this, event, {{size}})">
+                <img id="itemImage{{ item[4] }}"
+                        src="./static/img/itemImg/{{ item[0] }}.png"
+                        alt="{{ item[0] }}" 
                         width="55" height="55"
-                        title="{{ item['name'] }}"
+                        title="{{ item[0] }}"
                         loading="lazy">
             </button>
     {% endfor %}
@@ -24,17 +24,6 @@
     </form>
 </main>
     <script type="text/javascript">
-        function initItm() {
-            let listItems = {{listItems | tojson}};
-            for (i=0; i < listItems.length; i++) {
-                if (listItems[i]['state'] == 1) {
-                    let elem = document.getElementById("btn" + listItems[i]['id']);
-                    elem.classList.replace('btnImg', 'btnImgActive');
-                }
-            }
-        }
-        initItm();
-
         const size = parseInt({{size}});
         let totalItem = parseInt({{totalItem}});
     </script>

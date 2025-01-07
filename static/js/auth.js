@@ -122,8 +122,9 @@ function checkRegister() {
         if (data.status === 401) {
             errorUsernameField.innerHTML = 'Username is already taken';
             return;
-        } else if (data.status !== 200) {
+        } else if (data.status != 200) {
             alert("An error Occured during registration")
+            return;
         }
         window.location.href = "/login";  // Redirection correcte vers la page de connexion
     })
