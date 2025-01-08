@@ -10,7 +10,6 @@ function showItm(button, event, taille) {
     })
     .then(response => response.json())  // Si la réponse est JSON
     .then(data => {
-        console.log(data)
         let details = document.getElementById(selectedItem);
         let nbrElement = document.getElementById('nbr' + selectedItem);
         nbrElement.innerHTML = '<span class="itmUsr">' + data.djnState[0][2] + '</span>' + " / " + '<span class="totalItm">' + data.djnState[0][1] + '</span>';

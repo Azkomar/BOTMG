@@ -108,7 +108,7 @@ def sort():
     if "user" in session:
         listItems = getListItems(session, conn)
         if "size" not in session:
-            size = len(listItems, conn)
+            size = len(listItems)
             session["size"] = size
         totalItem = countItm(session, conn)
     else:

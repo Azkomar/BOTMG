@@ -1,4 +1,3 @@
-import sqlite3
 import re
 import psycopg2
 from psycopg2 import sql
@@ -43,38 +42,50 @@ def newUser(username, password, conn):
 
             # Insérer les données dans la table 'users'
             cur.execute("INSERT INTO users (username, hash, id) VALUES (%s, %s, %s)", data)
-
-            # Création d'une nouvelle ligne
-            newUserDB(username, conn)
-
             # Valider la transaction (commit)
             conn.commit()
+            if (newUserDB(id, conn) is not True):
+                conn.rollback()
+                return 400
 
             return 200
     except psycopg2.OperationalError as e:
         # Gérer les erreurs liées à la base de données
         newError(e, newUser.__name__, "Erreur avec SQL lors de la création d'un nouvel utilisateur", conn)
+        conn.rollback()
         return 400
     
     except Exception as e:
         # Gérer toute autre erreur
         newError(e, newUser.__name__, "Erreur inconnue lors de la création d'un nouvel utilisateur", conn)
+        conn.rollback()
         return 400
     
-def newUserDB(username, conn):
-    # Create a new line in the 'bank' database for the new user based on his ID
+def newUserDB(id, conn):
     """
-    Return True if the line is created correctly
-    Retrun False if an error occured
+    Crée une nouvelle entrée dans la table 'itemStates' pour chaque item existant,
+    associé à l'ID utilisateur.
+    Retourne True si l'opération est réussie, sinon False.
     """
     try:
         with conn.cursor() as cur:
-            query = sql.SQL("ALTER TABLE itemStateUser ADD COLUMN {column} INTEGER DEFAULT 0").format(column=sql.Identifier(username))
-            cur.execute(query)
+            # Insertion des données dans itemStates
+            query = """
+                INSERT INTO itemStates (userid, itemid, state)
+                SELECT users.id, items.id, 0
+                FROM users, items
+                WHERE users.id = %s
+            """
+            cur.execute(query, (id,))
             conn.commit()
             return True
-    except sqlite3.OperationalError as e:
-        newError(e, newUserDB.__name__, "Error with SQL during the creation of a new user database", conn)
+    except psycopg2.OperationalError as e:
+        newError(e, newUserDB.__name__, "Erreur SQL lors de l'insertion dans itemStates", conn)
+        conn.rollback()
+        return False
+    except Exception as e:
+        newError(e, newUserDB.__name__, "Erreur inattendue", conn)
+        conn.rollback()
         return False
 
 def checkLogin(username, password, conn):
@@ -125,8 +136,8 @@ def getListItems(session, conn):
     # Use to get the list of all the existing items
     try:
         with conn.cursor() as cur:
-            query = sql.SQL("SELECT i.*, s.{column} FROM items i JOIN itemStateUser s ON i.id = s.id ORDER BY i.name").format(column=sql.Identifier(session["user"]))
-            cur.execute(query)
+            query = sql.SQL("SELECT i.*, s.state FROM items i JOIN itemStates s ON i.id = s.itemid WHERE s.userid = %s ORDER BY i.name;")
+            cur.execute(query, (session["user_id"],))
             listItems = cur.fetchall()
             return listItems
     # If an error occured, return empty list
@@ -145,9 +156,9 @@ def update(session, genre, conn):
     try:
         with conn.cursor() as cur:
             # Get a list order by the selected 'genre' (dungeon, type, ust)
-            query = sql.SQL("SELECT DISTINCT(i.{column}), COUNT(i.{column}), SUM(s.{columnUser}) FROM items i JOIN itemStateUser s ON i.id = s.id GROUP BY (i.{column}) ORDER BY (i.{column})").format(
-                column=sql.Identifier(genre), columnUser=sql.Identifier(session["user"]))
-            cur.execute(query)
+            query = sql.SQL("SELECT DISTINCT(i.{column}), COUNT(i.{column}), SUM(s.state) FROM items i JOIN itemStates s ON i.id = s.itemid WHERE s.userid = %s GROUP BY (i.{column}) ORDER BY (i.{column})").format(
+                column=sql.Identifier(genre))
+            cur.execute(query, (session["user_id"],))
             listGenre = cur.fetchall()
             return listGenre
     # If an error occured, return empty list
@@ -164,8 +175,8 @@ def countItm(session, conn):
     try:
         with conn.cursor() as cur:
             result = 0
-            query = sql.SQL("SELECT SUM({column}) FROM itemStateUser").format(column=sql.Identifier(session["user"]))
-            cur.execute(query)
+            query = sql.SQL("SELECT SUM(state) FROM itemStates WHERE userid = %s")
+            cur.execute(query, (session["user_id"],))
             result = cur.fetchone()[0]
             return result
     except psycopg2.OperationalError as e:
@@ -179,16 +190,16 @@ def updateUserItem(session, itemId, conn) :
     # Update the state of a specific item by looking at his previous state
     try:
         with conn.cursor() as cur:
-            query = sql.SQL("SELECT {column} FROM itemStateUser WHERE id = %s").format(column=sql.Identifier(session["user"]))
-            cur.execute(query, (itemId,))
+            query = sql.SQL("SELECT state FROM itemStates WHERE itemid = %s AND userid = %s")
+            cur.execute(query, (itemId, session["user_id"]))
             itemState = cur.fetchone()[0]
             if itemState == 0:
-                query = sql.SQL("UPDATE itemStateUser SET {column} = 1 WHERE id = %s").format(column=sql.Identifier(session["user"]))
-                cur.execute(query, (itemId,))
+                query = sql.SQL("UPDATE itemStates SET state = 1 WHERE itemid = %s AND userid = %s")
+                cur.execute(query, (itemId, session["user_id"]))
                 state = 1
             else :
-                query = sql.SQL("UPDATE itemStateUser SET {column} = 0 WHERE id = %s").format(column=sql.Identifier(session["user"]))
-                cur.execute(query, (itemId,))
+                query = sql.SQL("UPDATE itemStates SET state = 0 WHERE itemid = %s AND userid = %s")
+                cur.execute(query, (itemId, session["user_id"]))
                 state = 0
             conn.commit()
             return state
@@ -206,14 +217,14 @@ def sortPage(req, session, conn):
     # Loop throught 'listType' to get the total amount of items in this specific object
     try:
         with conn.cursor() as cur:
-            query = sql.SQL("SELECT i.name, i.id, s.{column}, i.url FROM items i JOIN itemStateUser s ON i.id = s.id WHERE {columnType} = %s").format(
-                        column=sql.Identifier(session["user"]), columnType=sql.Identifier(session["genre"]))
-            cur.execute(query, (req, ))
+            query = sql.SQL("SELECT i.name, i.id, s.state, i.url FROM items i JOIN itemStates s ON i.id = s.itemid WHERE i.{columnType} = %s AND s.userid = %s").format(
+                        columnType=sql.Identifier(session["genre"]))
+            cur.execute(query, (req, session["user_id"]))
             liste = cur.fetchall()
-            query = sql.SQL("SELECT i.{column}, COUNT(i.{column}), SUM(s.{columnUser}) FROM items i JOIN itemStateUser s ON i.id = s.id WHERE i.{column} = %s GROUP BY (i.{column}) ORDER BY (i.{column})").format(
-                column=sql.Identifier(session["genre"]), columnUser=sql.Identifier(session["user"]))
+            query = sql.SQL("SELECT i.{column}, COUNT(i.{column}), SUM(s.state) FROM items i JOIN itemStates s ON i.id = s.itemid WHERE i.{column} = %s AND s.userid = %s GROUP BY (i.{column}) ORDER BY (i.{column})").format(
+                column=sql.Identifier(session["genre"]))
             
-            cur.execute(query, (req, ))
+            cur.execute(query, (req, session["user_id"]))
             djnState = cur.fetchall()
 
             response = {
@@ -246,7 +257,6 @@ def sendEmail(name, email, subject, message, mail, conn):
             {message}
             """
         )
-
         # Send email
         mail.send(msg)
         with conn.cursor() as cur:
@@ -268,8 +278,8 @@ def setAllItems(session, value, conn):
     # Set all the items to 'Active' or 'Inactive' depending of the value
     try:
         with conn.cursor() as cur:
-            query = sql.SQL("UPDATE itemStateUser SET {column} = %s").format(column=sql.Identifier(session["user"]))
-            cur.execute(query, (value,))
+            query = sql.SQL("UPDATE itemStates SET state = %s WHERE userid = %s")
+            cur.execute(query, (value, session["user_id"]))
             conn.commit()
     except Exception as e:
         newError(e, setAllItems.__name__, "Error during the setting of all value to 0 or 1", conn)
