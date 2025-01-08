@@ -11,9 +11,9 @@
     <form action="/tableSearch" method="POST">
         <div class='imgGrid'>
     {% for item in listItems %}
-            <button type="button" {% if item[5] == 0 %}class="btnImg"{% else %}class="btnImgActive"{% endif %} id="btn{{ item[4] }}" value="{{item[4]}}" name="{{item[0]}}" onclick="activateItem(this, event, {{size}})">
+            <button type="button" {% if item[6] == 0 %}class="btnImg"{% else %}class="btnImgActive"{% endif %} id="btn{{ item[4] }}" value="{{item[4]}}" name="{{item[0]}}" onclick="activateItem(this, event, {{size}})">
                 <img id="itemImage{{ item[4] }}"
-                        src="./static/img/itemImg/{{ item[0] }}.png"
+                        src="{{ item[5] }}"
                         alt="{{ item[0] }}" 
                         width="55" height="55"
                         title="{{ item[0] }}"

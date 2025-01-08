@@ -29,7 +29,7 @@ function showItm(button, event, taille) {
                                 class="btnImgActive" 
                                 value="${data.liste[i][1]}" 
                                 onclick="activateItem(this, event, ${taille})">
-                            <img src="./static/img/itemImg/${data.liste[i][0]}.png" 
+                            <img src="${data.liste[i][3]}" 
                                 alt="${data.liste[i][0]}" 
                                 width="55" height="55" 
                                 id="itemImage${data.liste[i][1]}"
@@ -42,7 +42,7 @@ function showItm(button, event, taille) {
                                 class="btnImg" 
                                 value="${data.liste[i][1]}"  
                                 onclick="activateItem(this, event, ${taille})">
-                            <img src="./static/img/itemImg/${data.liste[i][0]}.png" 
+                            <img src="${data.liste[i][3]}" 
                                 alt="${data.liste[i][0]}" 
                                 width="55" height="55" 
                                 id="itemImage${data.liste[i][1]}"

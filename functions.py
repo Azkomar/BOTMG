@@ -206,7 +206,7 @@ def sortPage(req, session, conn):
     # Loop throught 'listType' to get the total amount of items in this specific object
     try:
         with conn.cursor() as cur:
-            query = sql.SQL("SELECT i.name, i.id, s.{column} FROM items i JOIN itemStateUser s ON i.id = s.id WHERE {columnType} = %s").format(
+            query = sql.SQL("SELECT i.name, i.id, s.{column}, i.url FROM items i JOIN itemStateUser s ON i.id = s.id WHERE {columnType} = %s").format(
                         column=sql.Identifier(session["user"]), columnType=sql.Identifier(session["genre"]))
             cur.execute(query, (req, ))
             liste = cur.fetchall()
