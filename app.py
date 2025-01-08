@@ -161,7 +161,7 @@ def contact():
                 "status" : 400
             }
         else:
-            status = sendEmail(name, email, subject, message, mail)
+            status = sendEmail(name, email, subject, message, mail, conn)
             response = {
                 "status" : status
             }
