@@ -69,9 +69,9 @@ function checkRegister() {
 
     // Vérifier que le pseudo ne contient pas de caractères spéciaux
     const username = usernameField.value;
-    const usernameRegex = /^[a-zA-Z0-9-_]+$/; // Accepte uniquement lettres et chiffres
+    const usernameRegex = /^[A-Za-z][A-Za-z0-9_]{2,20}$/; // Accepte uniquement lettres et chiffres
     if (!usernameRegex.test(username)) {
-        errorUsernameField.innerHTML = 'Username can only contain letters and numbers.';
+        errorUsernameField.innerHTML = 'Username can only contain letters and numbers.<br>And contain between 2 and 20 characters !';
         usernameField.focus();
         return; // Stoppe la fonction si le pseudo est invalide
     }
