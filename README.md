@@ -34,23 +34,14 @@ To wrap up this section, there’s a link to the wiki (accessible by clicking on
     It includes all the data required to configure _Flask-Mail_ for automatically sending emails to registered addresses.
     It also loads the _SecretKey_ necessary for signing session cookies.
 
-### 4._.env_
-    - This small file contains sensitive information such as the email password and the secret key mentioned earlier.
-
-### 5._requirements.txt_
+### 4._requirements.txt_
     - This file lists all the required packages to make the website function properly. (More details about the individual packages will follow.)
 
-### 6._users.db_ and _bank.db_
-    - These are the databases:
-        - __users.db__ contains user data, item data, and an error log.
-        - __bank.db__  is used to track the state of each item for each user, with values set to either 0 or 1. It also logs email-related data.
-    > I made a significant mistake here. I should have used a single database to link all the information together. However, as I added more and more items, it became increasingly difficult to go back and restructure it properly. While this setup works fine for this project, it could lead to performance issues in larger projects.
-
-### 7._static folder_
+### 5._static folder_
     - The __static__ folder contains the CSS stylesheet and font files, which are used across all the HTML pages.
     It also includes all the images used in the templates, as well as the JavaScript files that make the pages more dynamic.
 
-### 8._templates folder_
+### 6._templates folder_
     - The __templates__ folder conatins all the HTML pages which are rendered by the Flask app.
 
 # What Are the Required Packages for It to Work?
@@ -61,8 +52,8 @@ However, there are also some additional packages:
 - __python-dotenv__: Allows sensitive values to be stored securely in an .env file and retrieved when needed.
 - __Flask-Mail__: Used to send emails to specific addresses by configuring the email-sending process and building the email content.
 - __Jinja2__: Used to embed Python variables within the HTML templates.
+- __psycopg2__: Used to connect to the Postgres database
 
 # Goal of this website
-The goal of my project for this website is to deploy it online after completing the CS50 course. As I’ve already discussed it with members of the ROTMG (Realm of the Mad God) community, many of them are excited about the website. Even some content creators are eager to see it!
-For a first website, I will be really proud if some members find it useful. :)
-I also hope people will send me ideas to improve it and make it even better!
+The goal of this website is simply to create something I would love to have in the game: a collection log !
+I hope you enjoy this amateur website! :)
