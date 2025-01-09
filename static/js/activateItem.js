@@ -6,6 +6,13 @@ function activateItem(button, event, itemMax) {
     // Récupérer la valeur de l'élément sélectionné
     var selectedItem = button.value;
 
+    if (button.className === 'btnImg') {
+        button.classList.replace('btnImg', 'btnImgActive');
+    }
+    else {
+        button.classList.replace('btnImgActive', 'btnImg');;
+    }
+
     // Créer un objet FormData pour envoyer la donnée du bouton
     var formData = new FormData();
     formData.append('btnImg', selectedItem);  // 'btnImg' est le nom du champ dans le formulaire
@@ -21,12 +28,6 @@ function activateItem(button, event, itemMax) {
         let percent = (totalItem / size) * 100;
         document.getElementById('progress').style.width = percent + '%';
         document.getElementById('progressText').innerText = totalItem + " / " + size;
-        if (data.status == 1) {
-            button.classList.replace('btnImg', 'btnImgActive');
-        }
-        else {
-            button.classList.replace('btnImgActive', 'btnImg');;
-        }
     })
     .catch(error => {
         console.error('Erreur:', error);

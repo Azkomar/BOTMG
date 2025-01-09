@@ -126,15 +126,18 @@ button:hover {
     border: 6px solid rgba(19, 19, 19, 0.479);
     border-radius: 10px 10px 10px 10px;
     text-align: center;
+    padding: 3%;
+    font-size: medium;
 }
 .logBtn  {
     color: white;
     margin: 1%;
     background-color: rgb(31, 29, 29);
-    width: 8rem;
-    height: 2rem;
+    width: 9rem;
+    height: 2.5rem;
     border-radius: 5px 5px 5px 5px;
     font-family: pixel;
+    font-size: medium;
     appearance: auto;
     border: 2px solid white;
 }
