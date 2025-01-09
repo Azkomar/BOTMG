@@ -45,10 +45,6 @@ button:hover {
     background-color: rgb(56, 55, 55)
 }
 
-.logInput {
-    margin-bottom: 1rem;
-}
-
 .errorMessage {
     color: red;
     font-size: small;
@@ -147,6 +143,12 @@ button:hover {
     background-color: rgba(66, 64, 64, 0.144);
     font-weight: bold;
     border: 2px solid rgb(175, 175, 175);
+}
+
+.logInput {
+    margin-bottom: 1rem;
+    font-size: medium;
+    padding: 2%;
 }
 
 .btnSet {
