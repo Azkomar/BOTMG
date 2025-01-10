@@ -10,7 +10,7 @@ function activateItem(button, event, itemMax) {
         button.classList.replace('btnImg', 'btnImgActive');
     }
     else {
-        button.classList.replace('btnImgActive', 'btnImg');;
+        button.classList.replace('btnImgActive', 'btnImg');
     }
 
     // Créer un objet FormData pour envoyer la donnée du bouton

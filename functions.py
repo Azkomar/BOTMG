@@ -281,6 +281,7 @@ def setAllItems(session, value, conn):
             query = sql.SQL("UPDATE itemStates SET state = %s WHERE userid = %s")
             cur.execute(query, (value, session["user_id"]))
             conn.commit()
+            return 200
     except Exception as e:
         newError(e, setAllItems.__name__, "Error during the setting of all value to 0 or 1", conn)
-        return(400)
+        return 400

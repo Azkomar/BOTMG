@@ -4,8 +4,8 @@
 <main class="containerGrid">
     <form action="/itemSet" method="POST">
         <div class="btnSet">
-            <button type="submit" name="setOne">Set all item to 'Active'</button>
-            <button type="submit" name="setZero">Set all item to 'Inactive'</button>
+            <button type="button" name="setter" onclick="setItem(1, {{size}})">Set all item to 'Active'</button>
+            <button type="button" name="setter" onclick="setItem(0, {{size}})">Set all item to 'Inactive'</button>
         </div>
     </form>
     <form action="/tableSearch" method="POST">
@@ -29,5 +29,6 @@
     </script>
     <script type="module" src="./static/js/search.js"></script>
     <script type="module" src="./static/js/initFunc.js"></script>
+    <script type="text/javascript" src="./static/js/setItem.js"></script>
     <script type="text/javascript" src="./static/js/activateItem.js"></script>
 {% endblock %}

@@ -149,33 +149,28 @@ def contact():
         validSubject = ("idea", "bug", "question")
 
         if not name or not email or not subject or not message:
-            response = {
-                "status" : 400
-            }
+            response = {"status" : 400}
         elif subject not in validSubject:
-            response = {
-                "status" : 400
-            }
+            response = {"status" : 400}
         elif not is_valid_email(email):
-            response = {
-                "status" : 400
-            }
+            response = {"status" : 400}
         else:
             status = sendEmail(name, email, subject, message, mail, conn)
-            response = {
-                "status" : status
-            }
+            response = {"status" : status}
         return jsonify(response)
     
 @app.route("/itemSet", methods=["GET", "POST"])
 def itemSet():
     if request.method == "POST":
-        if request.form.get("setOne") is not None:
-            setAllItems(session, '1', conn)
-        elif request.form.get("setZero") is not None:
-            setAllItems(session, '0', conn)
-        return redirect("/tableSearch")
-    return redirect("/tableSearch")
+        val = request.form.get("setter")
+        if val == '1':
+            status = setAllItems(session, '1', conn)
+        elif val == '0':
+            status = setAllItems(session, '0', conn)
+        else:
+            return redirect("/tableSearch")
+    response = {"status" : status}
+    return jsonify(response)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
