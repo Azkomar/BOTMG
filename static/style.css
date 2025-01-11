@@ -41,10 +41,6 @@ body {
     padding-bottom: 1%;
 }
 
-button:hover {
-    background-color: rgb(56, 55, 55)
-}
-
 .errorMessage {
     color: red;
     font-size: small;
@@ -126,23 +122,24 @@ button:hover {
     font-size: medium;
 }
 .logBtn  {
-    color: white;
     margin: 1%;
-    background-color: rgb(31, 29, 29);
     width: 9rem;
     height: 2.5rem;
-    border-radius: 5px 5px 5px 5px;
-    font-family: pixel;
     font-size: medium;
     appearance: auto;
-    border: 2px solid white;
 }
-
-.logBtn:hover {
+.logBtn, button, .navBtn {
+    color: lightgray;
+    border: 2px solid white;
+    background-color: rgb(27, 26, 26);
+    border-radius: 5px 5px 5px 5px;
+    font-family: pixel;
+}
+.logBtn:hover, button:hover, .navBtn:hover {
     color: white;
-    background-color: rgba(66, 64, 64, 0.144);
+    background-color: rgba(80, 78, 78, 0.514);
     font-weight: bold;
-    border: 2px solid rgb(175, 175, 175);
+    border: 2px solid rgb(255, 255, 255);
 }
 
 .logInput {
@@ -157,21 +154,11 @@ button:hover {
     justify-content: space-evenly;
 }
 .btnSet > button {
-    color: white;
     margin: 1%;
-    background-color: rgb(31, 29, 29);
     height: 2rem;
-    border-radius: 5px 5px 5px 5px;
-    font-family: pixel;
     appearance: auto;
-    border: 2px solid white;
 }
-.btnSet > button:hover {
-    color: white;
-    background-color: rgba(66, 64, 64, 0.144);
-    font-weight: bold;
-    border: 2px solid rgb(175, 175, 175);
-}
+
 
 #loginBtn {
     margin-top: 2rem;
@@ -246,13 +233,15 @@ button:hover {
     height: 64px;
     width: 64px;
     border: none;
-    background-color: rgb(17, 17, 17);
+    background-color: rgb(39, 7, 7);
     border-radius: 5px 5px 5px 5px;
     margin: 2%;
 }
-.btnImg > img {
-    filter : grayscale(1)
+
+.btnImg:hover {
+    background-color: rgb(19, 3, 3);
 }
+
 .btnImgActive {
     height: 64px;
     width: 64px;
@@ -306,7 +295,7 @@ button:hover {
     position: relative;
     height: 50px;
     z-index: 0;
-    background-color: #ddd;
+    background-color: #a3a3a3;
     margin: 1%;
     border: 1px solid black;
     border-radius: 5px 5px 5px 5px;
@@ -340,14 +329,7 @@ button:hover {
 }
 
 .navBtn {
-    font-family: pixel;
-    font-weight: bold;
-    color: white;
     padding: 5%;
-    border: 2px solid white;
-    background-color: rgb(27, 26, 26);
-    border-radius: 5px 5px 5px 5px;
-
 }
 
 #srchBar {
